@@ -1,0 +1,88 @@
+<%#
+  Mount point for the LF2 Online engine.
+
+  CSS class names are part of the engine's contract — the engine finds its UI
+  regions by selector. Do not rename them.
+
+  Turbo caching is disabled because the engine attaches global listeners and a
+  running interval with no teardown hook.
+%>
+<% content_for :title, "LF2 Online" %>
+<% content_for :head do %>
+  <meta name="turbo-cache-control" content="no-cache">
+  <%= stylesheet_link_tag "engine/core/style", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "engine/Game/application", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="game-root"
+     data-controller="game"
+     data-game-pack-root-value="engine/pack/">
+
+  <%= tag.script(
+    id: "engine-pack-assets",
+    type: "application/json"
+  ) { %><%== pack_asset_manifest.to_json %><% } %>
+
+  <div class="container">
+    <div class="window">
+      <section class="frontpage" aria-label="Title screen">
+        <div class="frontpage_content"></div>
+      </section>
+
+      <section class="settings" aria-label="Settings"></section>
+
+      <section class="recording" aria-label="Recording info"></section>
+
+      <section class="network_game" aria-label="Network game">
+        <div class="network_game_menu"></div>
+      </section>
+
+      <section class="gameplay" aria-label="Match">
+        <canvas class="canvas" width="0" height="0" data-game-target="canvas"></canvas>
+        <div class="top_status"></div>
+        <div class="bottom_status">
+          <input class="fps" value="0fps" readonly aria-label="Frames per second">
+          <span class="footnote"></span>
+        </div>
+        <div class="dialog_holder">
+          <div class="pause_message"></div>
+          <div class="summary_dialog"></div>
+        </div>
+        <div class="stage_counter"></div>
+        <div class="speech_bubble"></div>
+        <div class="char_labels"></div>
+        <div class="battle_hud"></div>
+        <div class="panel_flags"></div>
+        <div class="playback_overlay"></div>
+      </section>
+
+      <section class="character_selection" aria-label="Character select"></section>
+      <section class="stage_select" aria-label="Stage select"></section>
+      <section class="battle_setup" aria-label="Battle setup"></section>
+      <section class="championship" aria-label="Championship"></section>
+      <section class="demo_setup" aria-label="Demo setup"></section>
+
+      <section class="lobby" aria-label="Network lobby">
+        <div class="header">
+          <div class="nav">
+            <a class="close_button" role="button">×</a>
+          </div>
+        </div>
+        <iframe class="lobby_window" title="Lobby"></iframe>
+      </section>
+    </div>
+  </div>
+
+  <div class="extra_UI container">
+    <div class="dialog_holder">
+      <div class="alert_box" hidden>
+        <span class="alert_message">Loading…</span>
+        <button type="button" class="alert_box_ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="touch_control_holder"></div>
+
+  <input type="file" id="recording_file" accept=".json,application/json" hidden>
+</div>

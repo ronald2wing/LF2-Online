@@ -58,6 +58,14 @@ env:
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
 
+    # TURN relay advertised to clients via GET /protocol (see the `turn`
+    # accessory below and config/turnserver.conf). Point TURN_URL at your own
+    # coturn (or a hosted TURN provider) for the relay to take effect; until
+    # then clients fall back to STUN only.
+    # TURN_URL: turn:203.0.113.10:3478
+    # TURN_USERNAME: CHANGE_ME
+    # TURN_CREDENTIAL: CHANGE_ME
+
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
 # "bin/kamal logs -r job" will tail logs from the first server in the job section.
 aliases:
@@ -95,25 +103,13 @@ builder:
 #   user: app
 
 # Use accessory services (secrets come from .kamal/secrets).
-# accessories:
-#   db:
-#     image: mysql:8.0
-#     host: 192.168.0.2
-#     # Change to 3306 to expose port to the world instead of just local network.
-#     port: "127.0.0.1:3306:3306"
-#     env:
-#       clear:
-#         MYSQL_ROOT_HOST: '%'
-#       secret:
-#         - MYSQL_ROOT_PASSWORD
-#     files:
-#       - config/mysql/production.cnf:/etc/mysql/my.cnf
-#       - db/production.sql:/docker-entrypoint-initdb.d/setup.sql
-#     directories:
-#       - data:/var/lib/mysql
-#   redis:
-#     image: valkey/valkey:8
-#     host: 192.168.0.2
-#     port: 6379
-#     directories:
-#       - data:/data
+accessories:
+  turn:
+    image: coturn/coturn:4.17.2-alpine
+    host: 192.168.0.1
+    # Host networking lets coturn bind the full relay port range (49152-65535)
+    # directly; see config/turnserver.conf for the relay settings.
+    network: host
+    files:
+      - config/turnserver.conf:/etc/coturn/turnserver.conf:ro
+
