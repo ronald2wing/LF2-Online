@@ -40,6 +40,7 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+    - TURN_CREDENTIAL
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
@@ -57,6 +58,19 @@ env:
 
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
+
+    # TURN relay advertised to clients via GET /protocol (see the `turn`
+    # accessory below and config/turnserver.conf). TURN_URL and TURN_USERNAME
+    # are not secret; TURN_CREDENTIAL is a secret (see env.secret above).
+    # TURN_USERNAME must match the accessory's TURN_USERNAME below.
+    #
+    # A hostname is the right thing here: the client resolves it, so the relay
+    # survives an IP change. It MUST resolve to the machine running coturn, and
+    # that DNS record MUST be DNS-only — a CDN-proxied name (Cloudflare orange
+    # cloud) speaks HTTP(S) only and rejects TURN outright. Prefer a dedicated
+    # record such as turn.lf2.online over the app's own apex.
+    TURN_URL: turn:lf2.online:3478
+    TURN_USERNAME: CHANGE_ME
 
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
 # "bin/kamal logs -r job" will tail logs from the first server in the job section.
@@ -95,25 +109,41 @@ builder:
 #   user: app
 
 # Use accessory services (secrets come from .kamal/secrets).
-# accessories:
-#   db:
-#     image: mysql:8.0
-#     host: 192.168.0.2
-#     # Change to 3306 to expose port to the world instead of just local network.
-#     port: "127.0.0.1:3306:3306"
-#     env:
-#       clear:
-#         MYSQL_ROOT_HOST: '%'
-#       secret:
-#         - MYSQL_ROOT_PASSWORD
-#     files:
-#       - config/mysql/production.cnf:/etc/mysql/my.cnf
-#       - db/production.sql:/docker-entrypoint-initdb.d/setup.sql
-#     directories:
-#       - data:/var/lib/mysql
-#   redis:
-#     image: valkey/valkey:8
-#     host: 192.168.0.2
-#     port: 6379
-#     directories:
-#       - data:/data
+accessories:
+  turn:
+    image: coturn/coturn:4.17.2-alpine
+    host: 192.168.0.1
+    # Host networking lets coturn bind the relay port range (49152-49247)
+    # directly; see config/turnserver.conf for the relay settings. With
+    # `network: host` on a public-IP VPS, coturn auto-detects its external
+    # address, so `external-ip` stays commented in turnserver.conf.
+    #
+    # Managed TURN provider instead? Remove this accessory entirely and set
+    # only TURN_URL / TURN_USERNAME / TURN_CREDENTIAL in `env:` above — the
+    # coturn files (config/turnserver.conf) are then ignored.
+    network: host
+    files:
+      - config/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    env:
+      clear:
+        # Non-secret. Must match TURN_USERNAME served to clients in `env:` above.
+        TURN_USERNAME: CHANGE_ME
+      secret:
+        - TURN_CREDENTIAL
+        - PUBLIC_IP
+    # The long-term credential is never committed (config/turnserver.conf has
+    # no `user=` line); it is injected at runtime from .kamal/secrets. The
+    # `--external-ip` flag is added only when PUBLIC_IP is set — supply the
+    # public IP LITERAL there. It is required whenever this host is behind NAT
+    # (likely, given the LAN address in `servers:` above), because coturn would
+    # otherwise advertise its private address as the relay.
+    #
+    # NOTE: Kamal runs `cmd` through SSHKit, which may or may not shell-expand
+    # these vars on the host (they belong to the container). The explicit
+    # `sh -c "exec ..."` wrapper is the documented workaround, but the exact
+    # escaping must be confirmed on a real deploy — we cannot deploy from here.
+    cmd: >-
+      sh -c "exec turnserver -c /etc/coturn/turnserver.conf
+      --user=$TURN_USERNAME:$TURN_CREDENTIAL
+      ${PUBLIC_IP:+--external-ip=$PUBLIC_IP}"
+

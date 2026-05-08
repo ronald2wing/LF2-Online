@@ -6,7 +6,9 @@ development:
   adapter: async
 
 test:
-  adapter: test
+  # async (not the default `test` adapter) so system tests can drive two real
+  # lobby clients: the test adapter records broadcasts without delivering them.
+  adapter: async
 
 production:
   adapter: solid_cable

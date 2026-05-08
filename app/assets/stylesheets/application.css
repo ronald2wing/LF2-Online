@@ -1,10 +1,22 @@
 /*
- * This is a manifest file that'll be compiled into application.css.
+ * Host-page styles. The engine ships its own stylesheets under
+ * app/assets/stylesheets/engine/ and the view loads them directly.
  *
- * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
- * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
- * depending on specificity.
- *
- * Consider organizing styles into separate files for maintainability.
+ * The engine positions its UI absolutely inside .game-root. Do not
+ * flex-center or relayout the body — the engine expects full viewport.
  */
+
+:root {
+  --game-bg: #0a0a1a;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body:has(.game-root) {
+  overflow: hidden;
+  background: var(--game-bg);
+}

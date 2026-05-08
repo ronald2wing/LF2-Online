@@ -20,11 +20,38 @@ services:
     ports:
       - "3000:3000"
 
+    # Local TURN relay advertised to clients via GET /protocol. The coturn
+    # service below serves it; config/turnserver.conf stays generic and the
+    # dev-only credential/relay range are passed on the container command line.
+    environment:
+      TURN_URL: turn:127.0.0.1:3478
+      TURN_USERNAME: dev
+      TURN_CREDENTIAL: devpass
+
     depends_on:
     - selenium
+    - coturn
 
   selenium:
     image: selenium/standalone-chromium
     restart: unless-stopped
+
+  # Local coturn for browser testing. Reuses the shared production config
+  # (config/turnserver.conf, mounted read-only) and layers dev-only overrides on
+  # the command line: the dev credential plus the published relay range, so the
+  # checked-in file stays generic. Named host ports let browsers reach it.
+  coturn:
+    image: coturn/coturn:4.17.2-alpine
+    restart: unless-stopped
+    command:
+      - --user=dev:devpass
+      - --min-port=49152
+      - --max-port=49247
+    volumes:
+      - ../config/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    ports:
+      - "3478:3478/tcp"
+      - "3478:3478/udp"
+      - "49152-49247:49152-49247/udp"
 
   

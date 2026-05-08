@@ -21,7 +21,9 @@
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [3000],
+  // 3478 is the local coturn TURN listener (TCP and UDP share this port);
+  // TURN-over-TLS uses 5349 instead, which the dev relay does not enable.
+  "forwardPorts": [3000, 3478],
 
   // Configure tool-specific properties.
   // "customizations": {},
