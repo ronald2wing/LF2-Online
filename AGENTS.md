@@ -28,13 +28,40 @@ devcontainer exec --workspace-folder "/home/bigbrother/Desktop/Rails/LF2 Online"
 - `bin/dev` runs in the foreground — it will "time out" the shell after ~30s, which is expected (the server keeps running).
 - System tests need the `selenium` sidecar. It starts with `devcontainer up`, but it is **flaky**: if `POST /session` hangs, `docker restart lf2_online-selenium-1` + ~20s wait fixes it. The Rails app is at `172.22.0.3:3000`, selenium at `172.22.0.2:4444` on the docker network.
 
+## TURN / NAT traversal
+
+STUN alone cannot connect peers behind a symmetric NAT or CGNAT — it only
+discovers public addresses, it does not relay media. TURN exists to relay for
+those peers.
+
+- The **server is the source of truth**: `GET /protocol` returns `ice_servers`
+  built from `TURN_URL`, `TURN_USERNAME`, `TURN_CREDENTIAL`. The browser reads
+  `/protocol` and never hardcodes a relay. Unset `TURN_URL` → STUN only.
+- Production runs the self-hosted **coturn accessory**
+  (`coturn/coturn:4.17.2-alpine`, see `config/deploy.yml` and
+  `config/turnserver.conf`). Host ports that must be open: `3478/udp`,
+  `3478/tcp`, and the relay range `49152-49247/udp`.
+- Dev uses the same pinned image from `.devcontainer/compose.yaml`, mounts
+  `config/turnserver.conf` read-only, and passes the dev credential
+  `dev:devpass` on the command line; `/protocol` advertises
+  `turn:127.0.0.1:3478`.
+- Verify a real relay with coturn's
+  `turnutils_uclient -u <user> -w <credential> -p 3478 <host>`, or in a browser
+  with the trickle-ICE sample looking for a candidate of type **`relay`**
+  (`host`/`srflx` do not prove TURN works).
+- **Managed provider bypass** (Metered/Twilio/Cloudflare): set only the three
+  env vars and ignore the coturn files.
+- **Caveat:** Docker Desktop forwards TCP reliably but not UDP, so a local UDP
+  relay test may need host networking or a native coturn.
+
 ## Architecture
 
 ```
 app/javascript/engine/Game/     Core game engine (entities, mechanics, AI, sprites, physics)
 app/javascript/engine/pack/     Game data: characters, weapons, stages, UI (LF2_19 format)
 app/javascript/engine/core/     Engine core libs (sprite renderer, collision, etc.)
-app/javascript/engine/network.js   WebSocket/P2P signaling layer
+app/javascript/engine/network.js   Lockstep input/digest layer (frame sync)
+public/network.js                  WebRTC/WebSocket P2P transport + signaling
 architecture/                  LF2 engine specification docs — read these for game logic, not code
 ```
 
