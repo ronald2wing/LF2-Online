@@ -1,0 +1,1424 @@
+.game-root
+{
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	overflow: hidden;
+	position: relative;
+	width: 794px;
+	margin: 0 auto;
+	font-family:Arial,sans;
+	font-size:18px;
+	/* hide until the engine has rendered its first frame, then fade in */
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+.game-root.ready
+{
+	opacity: 1;
+}
+.container
+{
+	position: relative;
+}
+.extra_UI
+{
+	position:absolute;
+	left:0; top:0;
+	width:804px; height:590px;
+	pointer-events:none;
+}
+.extra_UI.maximized
+{
+	width:100%; height:100%;
+}
+.maximized.frontpage
+{
+	height: 100vh;
+}
+.maximized .frontpage_content
+{
+	position:absolute;
+	left:0; top:60px;
+	right:0; bottom:0;
+	margin:auto;
+	width:794px;
+	height:550px;
+	transform-origin: center center;
+}
+.frontpage_text
+{
+	position:absolute;
+	font-family:Helvetica,sans-serif;
+	font-weight:bold;
+	font-size:11px;
+	letter-spacing:0.25px;
+	line-height:20px;
+	color:#8899cc;
+	text-align:left;
+	padding:12px;
+	z-index:10;
+}
+.frontpage_text a
+{
+	text-decoration:none;
+	color:#5077d0;
+}
+.frontpage_text .number
+{
+	letter-spacing:0.5px;
+}
+.window
+{
+	position:relative;
+	border:none;
+	width:794px;
+	height:550px;
+	background:#000;
+	overflow:hidden;
+}
+.window > div
+{
+	position:absolute;
+	left:0; top:0;
+	right:0; bottom:0;
+}
+.bgviewer .window
+{
+	height:400px;
+}
+.wideWindow .window
+{
+	height:422px;
+	width:1000px;
+}
+.ProjectFbutton
+{
+	background:#7c547c;
+}
+.ProjectFbutton a
+{
+	text-decoration:none;
+	color:#FFF;
+}
+.ProjectFbutton:hover
+{
+	background:#9d6e9d;
+}
+.gameplay
+{
+	width: 100%; height: 100%;
+	position: absolute;
+	left: 0; top: 0;
+}
+.gameplay canvas { display: block; position: absolute; left: 0; top: 0; }
+.panel
+{
+	position:absolute;
+	left:0; top:0;
+	width:100%; height:100%;
+	z-index:2;
+}
+.background
+{
+	position:absolute;
+	left:0; top:0;
+	width:100%; height:100%;
+	z-index:-1;
+	overflow:hidden;
+	/* Night-sky navy: shows through the transparent "drop" regions of side-view
+	   backgrounds like Brokeback Cliff so they read as sky, not a hard void. */
+	background:#080D3C;
+}
+.maximized .background
+{
+	overflow:visible;
+}
+.bgviewer .background
+{
+	top:-128px;
+}
+.top_status
+{
+	position:absolute;
+	background:#000;
+	left:0; top:106px;
+	width:100%; height:22px;
+	line-height:22px;
+	font-family:"MS PMincho",monospace;
+	font-size:14px;
+	font-weight:bold;
+	color:#FFF;
+}
+.top_status button
+{
+	padding:0 10px;
+}
+.wideWindow .top_status
+{
+	opacity: 0.5;
+}
+.bottom_status
+{
+	position:absolute;
+	bottom:0px;
+	width:100%; height:22px;
+	line-height:22px;
+	background:#000;
+	text-align:right;
+}
+.fps
+{
+	float:left;
+	border:none;
+	background:none;
+	width:50px;
+	color:#FFF;
+	padding:0 5px 0 5px;
+}
+.footnote
+{
+	font-family:"MS PMincho",monospace;
+	font-size:12px;
+	text-shadow: 0px -1px 2px #666, 1px 0px 2px #666, 0px 2px 2px #666, -2px 0px 2px #666;
+	letter-spacing:2px;
+	color:#FFF;
+}
+.backgroundScroll
+{
+	position:absolute;
+	width:100%;
+	top:550px;
+	overflow-x:scroll;
+	overflow-y:hidden;
+}
+.maximized .backgroundScroll
+{
+	display:none;
+}
+.wideWindow .backgroundScroll
+{
+	top:422px;
+}
+.backgroundScrollChild
+{
+	position:absolute;
+	left:0; top:0;
+	height:1px;
+}
+.bgviewer .backgroundScroll
+{
+	top:400px;
+	z-index:10;
+}
+.window .dialog_holder
+{
+	position:absolute;
+	left:0; top:0;
+	width:100%; height:100%;
+}
+.dialog_holder
+{
+	pointer-events:none;
+}
+.dialog_holder > div
+{
+	position:absolute;
+	left:0; top:0;
+	right:0; bottom:0;
+	margin:auto;
+	pointer-events:auto;
+}
+.alert_box
+{
+	height: 100px;
+	width: 300px;
+	padding: 20px;
+	text-align: center;
+	background: rgba(50,50,50,0.8);
+	color: #FFF;
+	box-shadow: 0 0 20px rgb(50,50,50);
+	position: fixed;
+	top: 40%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+	z-index: 100;
+}
+.alert_box > button
+{
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    font-weight: bold;
+    padding: 4px 12px;
+    background: rgba(255,255,255,1);
+    border-radius: 5px;
+}
+.touch_control_holder
+{
+	position:fixed;
+	top:0;
+	left:0; right:0;
+	height:100%;
+	z-index:50;
+	pointer-events:none;
+}
+.touch_controller_button
+{
+	position:absolute;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	color:#FFF;
+	font-size:22px;
+	font-weight:bold;
+	text-shadow:0 1px 2px rgba(0,0,0,0.6);
+	opacity:0.8;
+	pointer-events:auto;
+	user-select:none;
+	-webkit-user-select:none;
+	-webkit-tap-highlight-color:transparent;
+	transition:transform 0.08s ease-out, filter 0.08s ease-out, box-shadow 0.08s ease-out;
+}
+.touch_controller_button > span
+{
+	display:block;
+	line-height:1;
+	pointer-events:none;
+}
+/* action buttons — circular neon-glow buttons */
+.touch_controller_button.action
+{
+	background:rgba(20, 20, 25, 0.5);
+	border:2px solid #4db8ff;
+	border-radius:50%;
+	box-shadow:0 0 20px rgba(77, 184, 255, 0.8), inset 0 0 8px rgba(77, 184, 255, 0.4);
+}
+/* pressed state — brighten the glow for tactile feedback */
+.touch_controller_button.pressed
+{
+	transform:scale(0.9);
+	filter:brightness(1.3);
+	box-shadow:0 0 30px rgba(77, 184, 255, 1), inset 0 0 12px rgba(77, 184, 255, 0.8);
+}
+/* circular joystick-style d-pad disc — a flat dark disc with a thin cyan neon
+   rim and a recessed center well. Direction is read from the touch quadrant,
+   so the disc itself carries no arrow glyphs. */
+.touch_dpad
+{
+	position:absolute;
+	border-radius:50%;
+	background:rgba(20, 20, 25, 0.5);
+	border:2px solid #4db8ff;
+	box-shadow:0 0 20px rgba(77, 184, 255, 0.8), inset 0 0 8px rgba(77, 184, 255, 0.4);
+	pointer-events:auto;
+	user-select:none;
+	-webkit-user-select:none;
+	-webkit-tap-highlight-color:transparent;
+}
+/* recessed center well of the d-pad disc */
+.touch_dpad_hub
+{
+	position:absolute;
+	border-radius:50%;
+	background:rgba(10, 10, 14, 0.6);
+	border:2px solid #4db8ff;
+	box-shadow:0 0 15px rgba(77, 184, 255, 0.7), inset 0 0 8px rgba(77, 184, 255, 0.5);
+	pointer-events:none;
+}
+.projectFmessage
+{
+	display:none;
+}
+.character_selection
+{
+	width: 100%; height: 100%;
+	position: absolute;
+	left: 0; top: 0;
+}
+.settings
+{
+	width: 100%; height: 100%;
+	position: absolute;
+	left: 0; top: 0;
+	font-size:16px;
+}
+.textbox, .settings
+{
+	font-family:Helvetica,sans-serif;
+	font-weight:bold;
+	color:#FFF;
+}
+.textbox
+{
+	text-align:center;
+	font-size:13px;
+}
+.keychanger
+{
+	position:absolute;
+	left:70px; top:160px;
+	text-align:center;
+}
+.keychanger table
+{
+	border-collapse: collapse;
+	background: #334DA4;
+	border: 3px solid #20316F;
+}
+.keychanger td
+{
+	width: 120px;
+	padding: 4px 8px;
+	border: 1px solid #20316F;
+	color: #FFFFFF;
+}
+.keychanger td:hover
+{
+	background: #334DA4;
+}
+.keychanger td.left_cell
+{
+	background: #102063;
+	color: #95BDFF;
+	text-align: right;
+}
+.keychanger td.left_cell:hover
+{
+	background: #102063;
+}
+.settings .note
+{
+	color:#95BDFF;
+}
+/* Network Game HTML screen (replaces network_game.png) */
+/* Colors match the original LF2 palette: bg #102063, panel #334DA4,
+   border #20316F, title #95BDFF, menu text #95BDFF, active #FFFFFF. */
+.network_game_panel
+{
+	position: absolute;
+	left: 50%; top: 50%;
+	transform: translate(-50%, -50%);
+	box-sizing: border-box;
+	width: 420px;
+	padding: 30px;
+	text-align: center;
+	background: #334DA4;
+	border: 3px solid #20316F;
+	border-radius: 3px;
+}
+.network_game_title
+{
+	margin: 0 0 20px 0;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 22px;
+	color: #95BDFF;
+}
+.network_game_server
+{
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	margin: 6px 0;
+	padding: 8px 24px;
+	background: #102463;
+	border: 1px solid #20316F;
+	border-radius: 4px;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 13px;
+	color: #FFFFFF;
+	cursor: pointer;
+}
+.network_game_server:hover
+{
+	background: #334DA4;
+}
+.network_game_custom_label
+{
+	display: block;
+	margin: 16px 0 6px 0;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 13px;
+	color: #95BDFF;
+}
+.network_game_input
+{
+	box-sizing: border-box;
+	width: 100%;
+	padding: 8px;
+	background: #102463;
+	border: 1px solid #20316F;
+	border-radius: 4px;
+	font-family: monospace;
+	font-size: 13px;
+	color: #FFFFFF;
+	text-align: center;
+}
+.network_game_connect
+{
+	box-sizing: border-box;
+	width: 48%;
+	margin: 16px 1% 0 1%;
+	padding: 8px 24px;
+	background: #102463;
+	border: 1px solid #20316F;
+	border-radius: 4px;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 13px;
+	color: #FFFFFF;
+	cursor: pointer;
+}
+.network_game_connect:hover
+{
+	background: #334DA4;
+}
+.network_game_back
+{
+	box-sizing: border-box;
+	width: 48%;
+	margin: 16px 1% 0 1%;
+	padding: 8px 24px;
+	background: #102463;
+	border: 1px solid #20316F;
+	border-radius: 4px;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 13px;
+	color: #FFFFFF;
+	cursor: pointer;
+}
+.network_game_back:hover
+{
+	background: #334DA4;
+}
+.network_game_log
+{
+	box-sizing: border-box;
+	width: 100%;
+	margin-top: 16px;
+	min-height: 48px;
+	max-height: 80px;
+	overflow-y: auto;
+	padding: 8px;
+	background: #102063;
+	border: 1px solid #20316F;
+	border-radius: 4px;
+	text-align: left;
+	font-family: monospace;
+	font-size: 11px;
+	color: #95BDFF;
+}
+.enable_sound
+{
+	position:absolute;
+	left:120px; top:400px;
+	width:280px;
+	z-index:2;
+}
+.character_selection_textbox
+{
+    transition:color 0.1s;
+}
+.menu_dialog_textbox
+{
+	text-align:left;
+	padding-left:5px;
+}
+.lobby
+{
+	position:absolute;
+    left:0; top:0; right:0; bottom:0;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	align-content: center;
+	align-items: center;
+	z-index:10;
+}
+.lobby > *
+{
+	width:100%;
+}
+.lobby_window
+{
+	flex: 1 1 auto;
+	border: none;
+}
+.lobby .header
+{
+	height:50px;
+	min-height:50px;
+	background:#444466;
+	font-size:15px;
+	line-height:50px;
+}
+.lobby .nav
+{
+	padding-left: 10px;
+}
+.lobby .nav > a
+{
+	color:#FFF;
+	padding:10px;
+	text-decoration:none;
+	border:1px solid white;
+	cursor:pointer;
+}
+.lobby .nav > a:hover
+{
+	background:#449;
+}
+.frontpage
+{
+	position: absolute;
+	left: 0; top: 0;
+	width: 100%; height: 100%;
+}
+.frontpage_content
+{
+	width: 100%; height: 100%;
+}
+.network_game
+{
+	position: absolute;
+	left: 0; top: 0;
+	width: 100%; height: 100%;
+	background: #102063;
+}
+.stage_select_bg
+{
+	position: absolute;
+	left: 0; top: 0;
+	width: 100%; height: 100%;
+}
+.championship_panel
+{
+	position: absolute;
+	left: 130px; top: 125px;
+	width: 530px; height: 330px;
+	box-sizing: border-box;
+	background: #314D9C;
+	border: 3px solid #183073;
+	border-radius: 8px;
+}
+.championship_title
+{
+	position: absolute;
+	left: 0; right: 0;
+	top: 28px;
+	text-align: center;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 14px;
+	color: #FFFFFF;
+}
+.championship_bracket
+{
+	position: absolute;
+	left: 0; top: 0;
+	width: 100%; height: 100%;
+	pointer-events: none;
+}
+.championship_bracket_line
+{
+	stroke: #FFFFFF;
+	stroke-width: 2;
+}
+.championship_bracket_text
+{
+	fill: #6C86D5;
+	font-family: Helvetica, sans-serif;
+	font-size: 16px;
+	font-weight: bold;
+}
+.championship_entrants
+{
+	position: absolute;
+	left: 0; right: 0;
+	top: 230px;
+	display: flex;
+	justify-content: space-around;
+	align-items: flex-end;
+	padding: 0 12px;
+}
+.championship_entrant
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.championship_sprite
+{
+	width: 40px; height: 40px;
+	image-rendering: pixelated;
+}
+.championship_sprites_row
+{
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	gap: 2px;
+}
+.championship_winner_panel
+{
+	position: absolute;
+	left: 10px; top: 10px;
+	width: 280px;
+	background: #314D9C;
+	border: 3px solid #183073;
+	border-radius: 8px;
+	box-sizing: border-box;
+	padding: 8px 12px;
+	z-index: 5;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.championship_winner_name
+{
+	font-family: Helvetica, sans-serif;
+	font-size: 14px;
+	font-weight: bold;
+	color: #FFFFFF;
+	margin-bottom: 6px;
+}
+.championship_winner_portrait
+{
+	width: 79px; height: 79px;
+	image-rendering: pixelated;
+}
+.championship_winner_label
+{
+	margin-top: 6px;
+	font-family: Helvetica, sans-serif;
+	font-size: 18px;
+	font-weight: bold;
+	color: #FFFFFF;
+}
+.championship_letter
+{
+	margin-top: 2px;
+	font-family: Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #6C86D5;
+}
+.championship_team_label
+{
+	margin-bottom: 2px;
+	font-family: Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: bold;
+}
+.championship_hint
+{
+	position: absolute;
+	left: 0; right: 0;
+	bottom: 8px;
+	text-align: center;
+	font-family: Helvetica, sans-serif;
+	font-size: 14px;
+	color: #FFFFFF;
+}
+.game-root:has(.container.maximized)
+{
+	width: 100vw;
+	height: 100vh;
+}
+.maximized.container
+{
+	width: 794px;
+}
+.maximized.container.wideWindow
+{
+	width: 1000px;
+}
+/* Frontpage HTML title screen (replaces frontpage.png + frontpage_dialog PNGs) */
+/* Colors match the official LF2 v2.0 main menu (lf2v20_mainmenu.gif):
+   bg #10206C, title #FFFFFF, menu text #3750A7. */
+.frontpage_bg
+{
+	background: #10206C;
+	position: relative;
+}
+.frontpage_title
+{
+	position: absolute;
+	left: 0; right: 0;
+	top: 120px;
+	text-align: center;
+	font-family: "Brush Script MT", "Segoe Script", cursive, sans-serif;
+	font-weight: normal;
+	font-size: 48px;
+	line-height: 1;
+	color: #FFFFFF;
+	letter-spacing: 2px;
+	pointer-events: none;
+}
+.frontpage_subtitle
+{
+	font-family: Helvetica, sans-serif;
+	font-size: 14px;
+	font-weight: normal;
+	color: #FFFFFF;
+	margin-left: 12px;
+	vertical-align: middle;
+}
+.frontpage_menu
+{
+	position: absolute;
+	left: 0; right: 0;
+	top: 220px;
+	width: 100%;
+	box-sizing: border-box;
+	background: transparent;
+	border: none;
+	text-align: center;
+	padding: 0;
+}
+.frontpage_menu_item
+{
+	display: block;
+	width: 100%;
+	border: none;
+	background: none;
+	text-align: center;
+	font-family: Helvetica, sans-serif;
+	font-weight: normal;
+	font-size: 16px;
+	line-height: 30px;
+	color: #8C9BD4;
+	cursor: pointer;
+	padding: 0;
+}
+.frontpage_menu_item:hover,
+.frontpage_menu_item.active
+{
+	color: #FFFFFF;
+	background: rgba(86, 112, 199, 0.5);
+	border-radius: 6px;
+}
+/* Game start mode menu (shown after clicking "game start") */
+/* Same design as the main menu — only the options differ. */
+.frontpage_mode_menu
+{
+	position: absolute;
+	left: 0; right: 0;
+	top: 220px;
+	width: 100%;
+	box-sizing: border-box;
+	background: transparent;
+	border: none;
+	text-align: center;
+	padding: 0;
+}
+.frontpage_mode_item
+{
+	display: block;
+	width: 100%;
+	border: none;
+	background: none;
+	text-align: center;
+	font-family: Helvetica, sans-serif;
+	font-weight: normal;
+	font-size: 16px;
+	line-height: 30px;
+	color: #8C9BD4;
+	cursor: pointer;
+	padding: 0;
+}
+.frontpage_mode_item:hover,
+.frontpage_mode_item.active
+{
+	color: #FFFFFF;
+	background: rgba(86, 112, 199, 0.5);
+	border-radius: 6px;
+}
+/* Settings HTML screen (replaces settings.png + ok_button.png) */
+/* Colors match the original LF2 palette: bg #102063, text #95BDFF, box #102463. */
+.settings_bg
+{
+	background: #102063;
+	position: relative;
+}
+.settings_title
+{
+	position: absolute;
+	left: 0; right: 0;
+	top: 128px;
+	text-align: center;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 20px;
+	color: #95BDFF;
+	pointer-events: none;
+}
+.settings_ok,
+.settings_cancel
+{
+	position: absolute;
+	top: 470px;
+	width: 151px; height: 26px;
+	box-sizing: border-box;
+	background: #102463;
+	border: 1px solid #20316F;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 15px;
+	color: #95BDFF;
+	cursor: pointer;
+}
+.settings_ok
+{
+	left: 246px;
+}
+.settings_cancel
+{
+	left: 406px;
+}
+.settings_ok:hover,
+.settings_ok:active,
+.settings_cancel:hover,
+.settings_cancel:active
+{
+	background: #5670C7;
+	color: #FFFFFF;
+}
+/* Recording info screen (matches the LF2 recording info dialog) */
+.recording
+{
+	width: 100%; height: 100%;
+	position: absolute;
+	left: 0; top: 0;
+	font-size: 16px;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	color: #FFF;
+}
+.recording_bg
+{
+	background: #102063;
+	position: relative;
+}
+.recording_title
+{
+	position: absolute;
+	left: 0; right: 0;
+	top: 128px;
+	text-align: center;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 20px;
+	color: #95BDFF;
+	pointer-events: none;
+}
+.recording_form
+{
+	position: absolute;
+	left: 0; right: 0;
+	top: 190px;
+	margin: 0 auto;
+	width: 420px;
+}
+.recording_field
+{
+	display: flex;
+	align-items: center;
+	margin-bottom: 14px;
+}
+.recording_label
+{
+	width: 180px;
+	font-family: Helvetica, sans-serif;
+	font-size: 15px;
+	color: #95BDFF;
+}
+.recording_input
+{
+	flex: 1;
+	height: 24px;
+	box-sizing: border-box;
+	background: #102463;
+	border: 1px solid #20316F;
+	color: #FFFFFF;
+	font-family: Helvetica, sans-serif;
+	font-size: 14px;
+	padding: 0 6px;
+}
+.recording_turn_on
+{
+	display: flex;
+	align-items: center;
+	font-family: Helvetica, sans-serif;
+	font-size: 15px;
+	color: #95BDFF;
+	cursor: pointer;
+}
+.recording_checkbox
+{
+	margin: 0 8px 0 0;
+}
+.recording_ok
+{
+	position: absolute;
+	left: 0; right: 0;
+	top: 400px;
+	margin: 0 auto;
+	width: 151px; height: 26px;
+	box-sizing: border-box;
+	background: #102463;
+	border: 1px solid #20316F;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 15px;
+	color: #95BDFF;
+	cursor: pointer;
+}
+.recording_ok:hover,
+.recording_ok:active
+{
+	background: #5670C7;
+	color: #FFFFFF;
+}
+/* Survival stage counter ("Survival Stage: N" — shown during Survival Mode) */
+.stage_counter
+{
+	display: none;
+	position: absolute;
+	left: 0; right: 0;
+	top: 60px;
+	text-align: center;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 16px;
+	color: #FFFFFF;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+	pointer-events: none;
+	z-index: 10;
+}
+.speech_bubble
+{
+	display: none;
+	position: absolute;
+	background: rgba(255, 255, 255, 0.9);
+	color: #000000;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 13px;
+	padding: 3px 10px;
+	border-radius: 8px;
+	white-space: nowrap;
+	pointer-events: none;
+	z-index: 11;
+}
+/* Per-character name labels (below feet): humans show their name, AI shows "Com" */
+.char_labels
+{
+	position: absolute;
+	left: 0; top: 0;
+	width: 100%; height: 100%;
+	pointer-events: none;
+	z-index: 11;
+}
+.char_name_label
+{
+	position: absolute;
+	transform: translateX(-50%);
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 9px;
+	color: #FFFFFF;
+	opacity: 0.7;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+	white-space: nowrap;
+	pointer-events: none;
+}
+/* Battle Mode in-match HUD (19.gif): per-team stat line + difficulty label */
+.battle_hud
+{
+	display: none;
+	position: absolute;
+	left: 0; right: 0;
+	top: 106px;
+	pointer-events: none;
+	z-index: 10;
+}
+.panel_flags
+{
+	position: absolute;
+	left: 0; top: 0;
+	width: 100%; height: 100%;
+	pointer-events: none;
+	z-index: 10;
+}
+.battle_hud_flag
+{
+	position: absolute;
+	width: 14px; height: 12px;
+	clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.battle_hud_team
+{
+	position: absolute;
+	top: 0;
+	width: 50%;
+}
+.battle_hud_team1 { left: 0; }
+.battle_hud_team2 { right: 0; text-align: right; }
+.battle_hud_diff
+{
+	margin-top: 3px;
+	font-family: Helvetica, sans-serif;
+	font-size: 14px;
+	font-weight: bold;
+	color: #738EDE;
+}
+.battle_hud_stats
+{
+	display: inline-block;
+	background: #000;
+	padding: 2px 8px;
+	font-family: Helvetica, sans-serif;
+	font-size: 14px;
+	color: #FFFFFF;
+}
+/* Playback overlay (shown during a recording replay) */
+.playback_overlay
+{
+	display: none;
+	position: absolute;
+	left: 8px;
+	bottom: 40px;
+	padding: 10px 14px;
+	background: rgba(16, 32, 99, 0.8);
+	border: 1px solid #20316F;
+	border-radius: 4px;
+	font-family: Helvetica, sans-serif;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #FFFFFF;
+	z-index: 10;
+}
+.playback_overlay .playback_title
+{
+	font-weight: bold;
+	font-size: 15px;
+	color: #95BDFF;
+}
+.playback_overlay .playback_author
+{
+	font-weight: bold;
+}
+.playback_overlay .playback_info
+{
+	color: #95BDFF;
+}
+.playback_overlay .playback_meta
+{
+	color: #95BDFF;
+}
+.playback_overlay .playback_controls
+{
+	margin-top: 4px;
+	color: #9DB0E8;
+	font-size: 12px;
+}
+/* HTML menu dialogs (vs_mode_dialog, stage_mode_dialog) */
+/* Colors sampled from the original LF2 dialog1.png / vs_mode_dialog.png:
+   fill #334DA4, border #20316F, highlight #5670C7,
+   text #95BDFF, active text #FFFFFF. */
+.vmenu_dialog
+{
+	position: absolute;
+	box-sizing: border-box;
+	background: #334DA4;
+	border: 3px solid #20316F;
+	border-radius: 3px;
+}
+.vmenu_item
+{
+	position: absolute;
+	box-sizing: border-box;
+	border: none;
+	background: none;
+	text-align: center;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 13px;
+	line-height: 1;
+	color: #95BDFF;
+	cursor: pointer;
+	padding: 0;
+}
+.vmenu_item:hover,
+.vmenu_item.active
+{
+	color: #FFFFFF;
+	background: #5670C7;
+}
+/* value shown in a black box (matches the original LF2 value swatches) */
+.vmenu_value
+{
+	display: inline-block;
+	padding: 0 6px;
+	background: #000000;
+	color: #FFFFFF;
+	border-radius: 2px;
+}
+/* Battle setup screen (18.gif) — team customization */
+.battle_setup_bg
+{
+	position: absolute;
+	left: 0; top: 0;
+	width: 100%; height: 100%;
+}
+.battle_panel
+{
+	position: absolute;
+	left: 45px; top: 45px;
+	width: 703px; height: 460px;
+	box-sizing: border-box;
+	background: #314D9C;
+	border: 3px solid #183073;
+	border-radius: 6px;
+}
+.battle_divider
+{
+	position: absolute;
+	left: 351px; top: 0;
+	width: 3px; bottom: 60px;
+	background: #183073;
+}
+.battle_separator
+{
+	width: 100%;
+	height: 1px;
+	background: #183073;
+	margin: 4px 0;
+}
+.battle_legend
+{
+	font-family: Helvetica, sans-serif;
+	font-size: 10px;
+	color: #95BDFF;
+	margin: 2px 0 4px;
+}
+.battle_column
+{
+	position: absolute;
+	top: 0;
+	bottom: 50px;
+	width: 351px;
+	box-sizing: border-box;
+	padding: 8px 14px;
+	display: flex;
+	flex-direction: column;
+}
+.battle_column.selected
+{
+	background: rgba(66, 93, 173, 0.35);
+}
+.battle_team_header
+{
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+.battle_flag
+{
+	width: 18px; height: 14px;
+	display: inline-block;
+	/* Pennant (triangular flag) shape — the real flag is hardcoded in lf2.exe, not a data sprite */
+	clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.battle_team_title
+{
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 18px;
+	color: #FFFFFF;
+}
+.battle_label
+{
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 13px;
+	color: #FFFFFF;
+	margin: 4px 0 3px;
+}
+.battle_diff
+{
+	margin-left: 8px;
+	font-size: 12px;
+	color: #738EDE;
+}
+.battle_follower_header
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+}
+.battle_hero_row
+{
+	display: flex;
+	justify-content: center;
+	gap: 6px;
+	margin-bottom: 4px;
+}
+.battle_hero_slot
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.battle_hero_sprite
+{
+	width: 28px; height: 28px;
+	image-rendering: pixelated;
+}
+.battle_letter
+{
+	font-family: Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #FFFFFF;
+}
+.battle_defense
+{
+	font-family: Helvetica, sans-serif;
+	font-size: 13px;
+	color: #FFFFFF;
+	text-align: center;
+	margin: 2px 0 4px;
+}
+.battle_value_box
+{
+	display: inline-block;
+	padding: 0 4px;
+	background: #000000;
+	color: #FFFFFF;
+	border-radius: 2px;
+	font-size: 12px;
+}
+.battle_follower_grid
+{
+	display: flex;
+	justify-content: center;
+	width: 212px;
+	gap: 4px;
+}
+.battle_follower
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 32px;
+}
+.battle_follower_sprite
+{
+	width: 26px; height: 26px;
+	image-rendering: pixelated;
+}
+.battle_follower_drink
+{
+	background-repeat: no-repeat;
+}
+.battle_value_box.battle_zero
+{
+	background: #000;
+	color: #738EDE;
+}
+.battle_follower_wrap
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+}
+.battle_follower_row
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.battle_count_line
+{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	width: 212px;
+	gap: 2px;
+	margin-top: 2px;
+}
+.battle_count_grid
+{
+	display: flex;
+	justify-content: center;
+	gap: 4px;
+	width: 212px;
+}
+.battle_count_grid .battle_value_box
+{
+	width: 32px;
+	text-align: center;
+	padding: 0;
+	box-sizing: border-box;
+	font-size: 10px;
+}
+.battle_count_legend_label
+{
+	font-family: Helvetica, sans-serif;
+	font-size: 9px;
+	color: #FFFFFF;
+	white-space: nowrap;
+	line-height: 1;
+	position: absolute;
+	right: 100%;
+	margin-right: 4px;
+}
+.battle_count_legend_label.battle_count_legend_back
+{
+	right: auto;
+	left: 100%;
+	margin-right: 0;
+	margin-left: 4px;
+}
+.battle_use_default
+{
+	margin-top: auto;
+	border: none;
+	background: none;
+	text-align: center;
+	font-family: Helvetica, sans-serif;
+	font-size: 12px;
+	color: #FFFFFF;
+	cursor: pointer;
+	padding: 4px 0;
+}
+.battle_ok
+{
+	position: absolute;
+	left: 50%; bottom: 14px;
+	transform: translateX(-50%);
+	width: 140px;
+	box-sizing: border-box;
+	background: #314D9C;
+	border: 2px solid #000000;
+	border-radius: 4px;
+	font-family: Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 14px;
+	color: #FFFFFF;
+	cursor: pointer;
+	padding: 6px 0;
+	white-space: nowrap;
+	z-index: 5;
+}

@@ -1,0 +1,20 @@
+.engine-sprite {
+  position: absolute;
+  overflow: hidden;
+  width: 10px;
+  height: 10px;
+}
+
+.engine-sprite-group {
+  position: absolute;
+}
+
+.engine-sprite-inline {
+  overflow: hidden;
+  width: 10px;
+  height: 10px;
+}
+
+.engine-sprite-img {
+  position: absolute;
+}
