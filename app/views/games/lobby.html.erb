@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LF2 Online Lobby</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#10206c; color:#fff; font-family:Helvetica,sans-serif; font-size:14px; }
+  .lobby { max-width:400px; margin:40px auto; text-align:center; }
+  h1 { color:#5a77d8; font-size:20px; margin-bottom:16px; }
+  .status { color:#9b9bff; font-size:12px; margin:12px 0; }
+  .peer { background:#1e337a; border:1px solid #5a77d8; padding:12px; margin:8px 0; border-radius:4px; cursor:pointer; }
+  .peer:hover { background:#2a4488; }
+  .peer.selected { border-color:#1878ca; background:#1f3d6e; }
+  .btn { background:#1878ca; color:#fff; border:none; padding:8px 24px; font-size:13px; font-weight:bold; cursor:pointer; margin:4px; border-radius:4px; }
+  .btn:hover { background:#248ce5; }
+  .btn:disabled { background:#444; cursor:default; }
+</style>
+</head>
+<body>
+<div class="lobby">
+  <h1>LF2 Online Lobby</h1>
+  <div class="status" id="status">Connecting…</div>
+  <div id="peers"></div>
+  <button class="btn" id="challengeBtn" onclick="challenge()" disabled>Challenge</button>
+</div>
+
+<script>
+  const ROOM = "LF2 Online"
+  const myId = Math.random().toString(36).slice(2, 8)
+  let selectedPeer = null
+  let ws
+
+  function log(msg) { document.getElementById("status").textContent = msg }
+
+  function connect() {
+    const protocol = location.protocol === "https:" ? "wss:" : "ws:"
+    ws = new WebSocket(protocol + "//" + location.host + "/cable")
+
+    ws.onopen = function () {
+      log("Connected")
+      ws.send(JSON.stringify({
+        command: "subscribe",
+        identifier: JSON.stringify({ channel: "GameChannel", room: ROOM, client_id: myId })
+      }))
+    }
+
+    ws.onmessage = function (event) {
+      const msg = JSON.parse(event.data)
+      if (msg.type === "confirm_subscription") {
+        log("Joined " + ROOM)
+        send({ type: "presence" })
+      } else if (msg.message) {
+        handleMessage(msg.message)
+      }
+    }
+
+    ws.onclose = function () { log("Disconnected. Reconnecting…"); setTimeout(connect, 3000) }
+    ws.onerror = function () { log("Connection error") }
+  }
+
+  function send(data) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return
+    ws.send(JSON.stringify({
+      command: "message",
+      identifier: JSON.stringify({ channel: "GameChannel", room: ROOM, client_id: myId }),
+      data: JSON.stringify(data)
+    }))
+  }
+
+  function handleMessage(data) {
+    switch (data.type) {
+      case "peers":
+        renderPeers(data.peers)
+        break
+
+      case "challenge":
+        if (confirm(data.from + " challenges you! Accept?")) {
+          send({ type: "accept", to: data.from, role: "passive" })
+          send({ type: "start_game", id1: data.from, id2: myId })
+        }
+        break
+
+      case "accept":
+        log("Challenge accepted! Starting game…")
+        send({ type: "start_game", id1: myId, id2: data.from })
+        break
+
+      case "game_start":
+        // Server confirms both peers ready — notify parent window
+        window.parent.postMessage({
+          event: "start",
+          role: data.id1 === myId ? "active" : "passive",
+          id1: data.id1,
+          id2: data.id2
+        }, "*")
+        break
+    }
+  }
+
+  function renderPeers(peers) {
+    const container = document.getElementById("peers")
+    container.innerHTML = ""
+    peers.forEach(function (id) {
+      if (id === myId) return
+      const div = document.createElement("div")
+      div.className = "peer"
+      div.textContent = "Player " + id.slice(0, 4)
+      div.onclick = function () {
+        document.querySelectorAll(".peer").forEach(function (el) { el.classList.remove("selected") })
+        div.classList.add("selected")
+        selectedPeer = id
+        document.getElementById("challengeBtn").disabled = false
+      }
+      container.appendChild(div)
+    })
+  }
+
+  function challenge() {
+    if (!selectedPeer) return
+    send({ type: "challenge", to: selectedPeer })
+    log("Challenging " + selectedPeer.slice(0, 4) + "…")
+  }
+
+  // Listen for init from parent (game iframe)
+  window.addEventListener("message", function (event) {
+    if (event.data && event.data.init) connect()
+  })
+
+  // Auto-connect
+  setTimeout(connect, 100)
+</script>
+</body>
+</html>
