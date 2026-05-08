@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LF2 Online Lobby</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; }
+  body {
+    background:#102063;
+    color:#e8ecff;
+    font-family:Helvetica,Arial,sans-serif;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+  .lobby {
+    position:relative;
+    width:100%;
+    max-width:420px;
+    background:#16265f;
+    border:1px solid #2c3f8f;
+    border-radius:10px;
+    padding:24px 24px 20px;
+    box-shadow:0 12px 32px rgba(0,0,0,.45);
+  }
+  .close {
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:28px;
+    height:28px;
+    line-height:1;
+    font-size:18px;
+    color:#9fb0e8;
+    background:transparent;
+    border:1px solid transparent;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .close:hover { color:#fff; background:#2c3f8f; border-color:#3d55b0; }
+  .close:focus-visible { outline:2px solid #5a75de; outline-offset:1px; }
+  h1 {
+    color:#8fa4f0;
+    font-size:18px;
+    font-weight:bold;
+    letter-spacing:.02em;
+    text-align:center;
+    margin-bottom:4px;
+  }
+  .me {
+    text-align:center;
+    color:#7f8fc4;
+    font-size:12px;
+    margin-bottom:16px;
+  }
+  .me b { color:#b9c6f5; font-weight:bold; }
+  .status {
+    min-height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#9b9bff;
+    font-size:13px;
+    line-height:1.35;
+    padding:8px 10px;
+    margin-bottom:12px;
+    background:#101d4d;
+    border:1px solid #24357a;
+    border-radius:6px;
+  }
+  .status.error { color:#ff9a9a; border-color:#7a2f3a; background:#2a1420; }
+  .status.success { color:#8fe6a8; border-color:#2f7a45; background:#122a1c; }
+  #peers { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+  .peer {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#1e337a;
+    border:1px solid #2c3f8f;
+    padding:12px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:background .12s, border-color .12s;
+  }
+  .peer:hover { background:#2a4488; border-color:#3d55b0; }
+  .peer.selected {
+    background:#1f3d6e;
+    border-color:#5a75de;
+    box-shadow:inset 3px 0 0 #5a75de;
+  }
+  .peer .marker { color:#5a75de; font-weight:bold; opacity:0; }
+  .peer.selected .marker { opacity:1; }
+  .peer .name { flex:1; text-align:left; }
+  .empty {
+    text-align:center;
+    color:#6f7fb5;
+    font-size:13px;
+    padding:18px 0;
+    border:1px dashed #2c3f8f;
+    border-radius:6px;
+  }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .btn {
+    flex:1 1 auto;
+    min-width:110px;
+    padding:10px 18px;
+    font-size:13px;
+    font-weight:bold;
+    color:#fff;
+    background:#3d55b0;
+    border:1px solid #4a63c4;
+    border-radius:6px;
+    cursor:pointer;
+    transition:background .12s, border-color .12s;
+  }
+  .btn:hover:not(:disabled) { background:#4a63c4; }
+  .btn:focus-visible { outline:2px solid #8fa4f0; outline-offset:1px; }
+  .btn:disabled { background:#2a2f45; border-color:#333a55; color:#6b7290; cursor:default; }
+  .btn.primary { background:#1878ca; border-color:#248ce5; }
+  .btn.primary:hover:not(:disabled) { background:#248ce5; }
+  .btn.danger { background:#8a2f3a; border-color:#a83a48; }
+  .btn.danger:hover:not(:disabled) { background:#a83a48; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="lobby">
+  <button class="close" id="closeBtn" type="button" aria-label="Close lobby">&times;</button>
+  <h1>LF2 Online Lobby</h1>
+  <div class="me">You are <b id="myName">…</b></div>
+  <div class="status" id="status" role="status" aria-live="polite">Connecting…</div>
+  <div id="peers"></div>
+  <div class="actions">
+    <button class="btn primary" id="challengeBtn" type="button" disabled>Challenge</button>
+    <button class="btn hidden" id="cancelBtn" type="button">Cancel</button>
+    <button class="btn primary" id="acceptBtn" type="button" class="hidden">Accept</button>
+    <button class="btn danger" id="declineBtn" type="button" class="hidden">Decline</button>
+  </div>
+</div>
+
+<script>
+  const ROOM = "LF2 Online"
+  const myId = Math.random().toString(36).slice(2, 8)
+  const CHALLENGE_TIMEOUT_MS = 15000
+
+  let ws
+  let selectedPeer = null
+  let state = "idle"
+  let peerId = null
+  let timeoutId = null
+  let stopped = false
+  // Origin of the parent frame (this game page), captured from the browser-
+  // authenticated init message and reused as the target for every reply below.
+  let parentOrigin = location.origin
+
+  const el = {
+    status: document.getElementById("status"),
+    peers: document.getElementById("peers"),
+    myName: document.getElementById("myName"),
+    challenge: document.getElementById("challengeBtn"),
+    cancel: document.getElementById("cancelBtn"),
+    accept: document.getElementById("acceptBtn"),
+    decline: document.getElementById("declineBtn"),
+    close: document.getElementById("closeBtn")
+  }
+
+  function shortName(id) { return "Player " + id.slice(0, 4) }
+
+  function setStatus(text, kind) {
+    el.status.textContent = text
+    el.status.className = "status" + (kind ? " " + kind : "")
+  }
+
+  function clearTimeout_() {
+    if (timeoutId) { clearTimeout(timeoutId); timeoutId = null }
+  }
+
+  function armTimeout() {
+    clearTimeout_()
+    timeoutId = setTimeout(function () {
+      if (state === "outgoing") {
+        send({ type: "cancel", to: peerId })
+        resolve("No response from " + shortName(peerId), "error")
+      } else if (state === "incoming") {
+        send({ type: "decline", to: peerId })
+        resolve(shortName(peerId) + " timed out", "error")
+      }
+    }, CHALLENGE_TIMEOUT_MS)
+  }
+
+  function render() {
+    const idle = state === "idle"
+    el.challenge.classList.toggle("hidden", !idle)
+    el.cancel.classList.toggle("hidden", state !== "outgoing")
+    el.accept.classList.toggle("hidden", state !== "incoming")
+    el.decline.classList.toggle("hidden", state !== "incoming")
+    el.challenge.disabled = !idle || !selectedPeer
+    el.peers.classList.toggle("hidden", state !== "idle")
+  }
+
+  function resolve(message, kind) {
+    clearTimeout_()
+    state = "idle"
+    peerId = null
+    setStatus(message, kind)
+    render()
+  }
+
+  function connect() {
+    if (stopped) return
+    if (ws && ws.readyState !== WebSocket.CLOSED) return
+    const protocol = location.protocol === "https:" ? "wss:" : "ws:"
+    ws = new WebSocket(protocol + "//" + location.host + "/cable")
+
+    ws.onopen = function () {
+      setStatus("Connected")
+      ws.send(JSON.stringify({
+        command: "subscribe",
+        identifier: JSON.stringify({ channel: "GameChannel", room: ROOM, client_id: myId })
+      }))
+    }
+
+    ws.onmessage = function (event) {
+      const msg = JSON.parse(event.data)
+      if (msg.type === "confirm_subscription") {
+        setStatus("Waiting for another player…")
+        send({ type: "presence" })
+      } else if (msg.message) {
+        handleMessage(msg.message)
+      }
+    }
+
+    ws.onclose = function () {
+      clearTimeout_()
+      state = "idle"
+      peerId = null
+      setStatus("Disconnected. Reconnecting…", "error")
+      render()
+      if (!stopped) setTimeout(connect, 3000)
+    }
+    ws.onerror = function () { setStatus("Connection error", "error") }
+  }
+
+  // Closes the lobby's signaling connection and disables its reconnect loop.
+  // Called once the game starts so the lobby stops holding the client_id that
+  // the WebRTC transport subscribes under — otherwise the lobby's reconnect
+  // loop can overwrite the transport's room slot and break signaling mid-game.
+  function stop() {
+    stopped = true
+    clearTimeout_()
+    if (ws) {
+      ws.onclose = null
+      ws.close()
+      ws = null
+    }
+  }
+
+  function send(data) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return
+    ws.send(JSON.stringify({
+      command: "message",
+      identifier: JSON.stringify({ channel: "GameChannel", room: ROOM, client_id: myId }),
+      data: JSON.stringify(data)
+    }))
+  }
+
+  function handleMessage(data) {
+    switch (data.type) {
+      case "peers":
+        renderPeers(data.peers)
+        break
+
+      case "challenge":
+        handleChallenge(data.from)
+        break
+
+      case "accept":
+        if (state !== "outgoing" || data.from !== peerId) return
+        clearTimeout_()
+        state = "starting"
+        peerId = data.from
+        setStatus("Challenge accepted — starting the game…", "success")
+        render()
+        send({ type: "start_game", id1: myId, id2: data.from })
+        break
+
+      case "decline":
+        if (state !== "outgoing" || data.from !== peerId) return
+        resolve(shortName(data.from) + " declined", "error")
+        break
+
+      case "cancel":
+        if (state !== "incoming" || data.from !== peerId) return
+        resolve(shortName(data.from) + " cancelled the challenge", "error")
+        break
+
+      case "game_start":
+        stop()
+        window.parent.postMessage({
+          event: "start",
+          role: data.id1 === myId ? "active" : "passive",
+          id1: data.id1,
+          id2: data.id2
+        }, parentOrigin)
+        break
+    }
+  }
+
+  function renderPeers(peers) {
+    const others = peers.filter(function (id) { return id !== myId })
+    let resolved = false
+
+    if (state !== "idle" && peerId && others.indexOf(peerId) === -1) {
+      resolve(shortName(peerId) + " left the lobby", "error")
+      resolved = true
+    }
+
+    if (selectedPeer && others.indexOf(selectedPeer) === -1) {
+      selectedPeer = null
+    }
+
+    el.peers.innerHTML = ""
+    if (others.length === 0) {
+      const empty = document.createElement("div")
+      empty.className = "empty"
+      empty.textContent = "No other players yet"
+      el.peers.appendChild(empty)
+      if (state === "idle" && !resolved) setStatus("Waiting for another player…")
+      render()
+      return
+    }
+
+    others.forEach(function (id) {
+      const row = document.createElement("div")
+      row.className = "peer" + (id === selectedPeer ? " selected" : "")
+      row.setAttribute("role", "button")
+      row.setAttribute("tabindex", "0")
+
+      const name = document.createElement("span")
+      name.className = "name"
+      name.textContent = shortName(id)
+
+      const marker = document.createElement("span")
+      marker.className = "marker"
+      marker.textContent = "\u2713"
+
+      row.appendChild(name)
+      row.appendChild(marker)
+
+      function select() {
+        if (state !== "idle") return
+        selectedPeer = id
+        renderPeers(peers)
+        setStatus("Selected " + shortName(id) + " — press Challenge")
+      }
+      row.onclick = select
+      row.onkeydown = function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          select()
+        }
+      }
+      el.peers.appendChild(row)
+    })
+
+    if (state === "idle" && !resolved) {
+      setStatus(selectedPeer
+        ? "Selected " + shortName(selectedPeer) + " — press Challenge"
+        : "Select a player, then press Challenge")
+    }
+    render()
+  }
+
+  function challenge() {
+    if (state !== "idle" || !selectedPeer) return
+    state = "outgoing"
+    peerId = selectedPeer
+    send({ type: "challenge", to: peerId })
+    setStatus("Challenging " + shortName(peerId) + "…")
+    armTimeout()
+    render()
+  }
+
+  function cancelChallenge() {
+    if (state !== "outgoing") return
+    send({ type: "cancel", to: peerId })
+    resolve("Challenge cancelled", null)
+  }
+
+  function acceptChallenge() {
+    if (state !== "incoming") return
+    clearTimeout_()
+    const from = peerId
+    state = "starting"
+    setStatus("Challenge accepted — starting the game…", "success")
+    render()
+    // Only the challenger ("active" peer) sends start_game, in response to
+    // this accept. Sending it here too would broadcast game_start twice and
+    // make the parent spin up the WebRTC transport twice.
+    send({ type: "accept", to: from, role: "passive" })
+  }
+
+  function declineChallenge() {
+    if (state !== "incoming") return
+    send({ type: "decline", to: peerId })
+    resolve("Challenge declined", null)
+  }
+
+  function handleChallenge(fromId) {
+    if (state === "outgoing") {
+      // Simultaneous mutual challenge: the lexicographically smaller id stays
+      // the challenger; the larger id yields and accepts the incoming one.
+      if (myId < fromId) return
+      clearTimeout_()
+      state = "idle"
+      peerId = null
+    } else if (state !== "idle") {
+      send({ type: "decline", to: fromId })
+      return
+    }
+    state = "incoming"
+    peerId = fromId
+    setStatus(shortName(fromId) + " challenges you")
+    armTimeout()
+    render()
+  }
+
+  el.challenge.onclick = challenge
+  el.cancel.onclick = cancelChallenge
+  el.accept.onclick = acceptChallenge
+  el.decline.onclick = declineChallenge
+  el.close.onclick = function () { window.parent.postMessage({ event: "close" }, parentOrigin) }
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      if (state === "outgoing") cancelChallenge()
+      else if (state === "incoming") declineChallenge()
+    } else if (event.key === "Enter" && state === "incoming") {
+      event.preventDefault()
+      acceptChallenge()
+    }
+  })
+
+  el.myName.textContent = shortName(myId)
+  render()
+
+  window.addEventListener("message", function (event) {
+    // Only the parent frame may drive the lobby: reject any other sender,
+    // then record the parent's real origin (reported by the browser) so the
+    // replies above target it directly instead of "*".
+    if (event.source !== window.parent) return
+    if (event.data && event.data.init) {
+      parentOrigin = event.origin
+      connect()
+    }
+  })
+
+  setTimeout(connect, 100)
+</script>
+</body>
+</html>
